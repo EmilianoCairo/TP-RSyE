@@ -1,0 +1,38 @@
+Métricas:
+-Conectividad
+-componentes
+-componentes gigantes
+-distancia promedio
+-el erdos del dc/exactas
+-diámetro
+-Clustering Coefficient
+-bridges and local bridges
+-Generalizing the Notions of Weak Ties and Local Bridges (aristas con peso)
+-Tie Strength. Ej Facebook.
+-embeddedness
+-Betweenness
+-homofilia (no sé bien cómo lo podríamos usar, quizás algo con género?)
+-afiliación. ver fig 4.10.
+-neighborhood overlap
+-similarity
+
+Figuras:
+-Figura 2.11 pag 39 dice: Figure 2.11 shows the distribution of distances averaged over a random sample
+of 1000 users: breadth-first search was performed separately from each of these 1000 users,
+and the results from these 1000 nodes were combined to produce the plot in the figure.
+The reason for this estimation by sampling users is a computational one: the graph was
+so large that performing breadth-first search from every single node would have taken an
+astronomical amount of time. Producing plots like this efficiently for massive graphs is an
+interesting research topic in itself
+-Figura 3.7: describe a connection between tie strengthand network structure at a local level — in the 
+neighborhoods of individual nodes. 
+-Figuras 3.8 y 3.9: Si definimos categorías por ej, colaboración de 1 vez, relación cercana etc podemos hacer figuras similares.
+-figura 3.10: strong ties en función de la cantidad total de ties
+-figuras 3.12 y 3.13: intuición visual de un graph partitioning
+-Figura 4.9: 2 snapshots en momentos distintos y cuantificás los efectos de la clausura triádica a lo largo del tiempo. que tan probable es que se formen ejes 
+-4.10: mismo concepto pero usando filiación. qué tan probable es que se formen ejes entre gente del mismo labo por ej, o que alguien entre a un labo según con quien tiene relación
+-figuras 4.11 y 4.12.
+
+Algoritmos:
+-The Girvan-Newman Method: Successively Deleting Edges of High Betweenness. Podemos usar este algoritmos
+para encontrar los labos del dc/ los departamentos de exactas.
