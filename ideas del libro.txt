@@ -32,6 +32,7 @@ neighborhoods of individual nodes.
 -Figura 4.9: 2 snapshots en momentos distintos y cuantificás los efectos de la clausura triádica a lo largo del tiempo. que tan probable es que se formen ejes 
 -4.10: mismo concepto pero usando filiación. qué tan probable es que se formen ejes entre gente del mismo labo por ej, o que alguien entre a un labo según con quien tiene relación
 -figuras 4.11 y 4.12.
+-figura 18.2: Power law distribution
 
 Algoritmos:
 -The Girvan-Newman Method: Successively Deleting Edges of High Betweenness. Podemos usar este algoritmos
