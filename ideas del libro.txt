@@ -37,3 +37,10 @@ neighborhoods of individual nodes.
 Algoritmos:
 -The Girvan-Newman Method: Successively Deleting Edges of High Betweenness. Podemos usar este algoritmos
 para encontrar los labos del dc/ los departamentos de exactas.
+
+Notas:
+-Coautorias (no dirigido), para dirigidos habría que hacerlo con director/tesista
+-2 niveles análisis exactas/dc (página icc). Posible comparación datos subset dc biblioteca exactas).
+-hacer checklist
+-streamlit
+-buen viaje jose
