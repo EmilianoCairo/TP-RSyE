@@ -24,8 +24,7 @@ The reason for this estimation by sampling users is a computational one: the gra
 so large that performing breadth-first search from every single node would have taken an
 astronomical amount of time. Producing plots like this efficiently for massive graphs is an
 interesting research topic in itself
--Figura 3.7: describe a connection between tie strengthand network structure at a local level — in the 
-neighborhoods of individual nodes. 
+-Figura 3.7: describe a connection between tie strength and network structure at a local level — in the neighborhoods of individual nodes. 
 -Figuras 3.8 y 3.9: Si definimos categorías por ej, colaboración de 1 vez, relación cercana etc podemos hacer figuras similares.
 -figura 3.10: strong ties en función de la cantidad total de ties
 -figuras 3.12 y 3.13: intuición visual de un graph partitioning
@@ -42,5 +41,10 @@ Notas:
 -Coautorias (no dirigido), para dirigidos habría que hacerlo con director/tesista
 -2 niveles análisis exactas/dc (página icc). Posible comparación datos subset dc biblioteca exactas).
 -hacer checklist
--streamlit
+-hacer el streamlit
 -buen viaje jose
+-las filiaciones tienen typos (dpto de computatión por ej) y no están bien separadas. no se si se puede arreglar sin scrappear de vuelta. deberían estar separadas por un ; pero están pegadas. en la pagina estaban con un newline
+-las filiaciones son en gral por artículo
+-hay que ver como definir la pertenencia al dc. siempre se puede hacer la más facil (o sea, si tu artículo tiene al dc como filiacion, vos también sos del dc) y decir que es una deficiencia del dataset.
+-terminar parte teórica del overleaf
+-falta meter en el código un par más de las métricas, pero supongo que en networkx están también las que faltan. no me fijé-
