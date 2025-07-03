@@ -18,7 +18,7 @@ def cargarYProcesar(ruta_archivo):
     maxComp, num_comp, tam_comp = cod.analizar_conectividad(g)
     return g, maxComp, weighted, num_comp, tam_comp
 
-g, maxComp, weighted, num_comp, tam_comp = cargarYProcesar('articulos.csv')
+g, maxComp, weighted, num_comp, tam_comp = cargarYProcesar('articles.csv')
 
 st.sidebar.header("Métricas Generales")
 st.sidebar.metric("Total de Autores", g.number_of_nodes())
