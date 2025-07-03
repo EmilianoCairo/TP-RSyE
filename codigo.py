@@ -3,7 +3,7 @@ import pandas as pd
 import itertools 
 
 def cargarDatos(ruta_archivo):
-    df = pd.read_csv(ruta_archivo, sep=',').drop_duplicates('Título')
+    df = pd.read_csv(ruta_archivo, sep=';', usecols=['Título', 'Autor']).drop_duplicates('Título')
     coautorias = []
     
     for _, row in df.iterrows():
@@ -18,10 +18,9 @@ def cargarDatos(ruta_archivo):
 
     return coautorias
 
-def crear_grafo(coautorias, atributos):
+def crear_grafo(coautorias):
     g = nx.Graph()
     g.add_edges_from(coautorias)
-    nx.set_node_attributes(g, atributos)
 
     weighted = nx.Graph()
     for autor1, autor2 in coautorias:
@@ -29,7 +28,6 @@ def crear_grafo(coautorias, atributos):
             weighted[autor1][autor2]['weight'] += 1
         else:
             weighted.add_edge(autor1, autor2, weight=1)
-    nx.set_node_attributes(weighted, atributos)
     
     return g, weighted
 
@@ -43,6 +41,14 @@ def betweenness(G):
 
 def tieStrength(weighted):
     print("hay que hacerlo")
+
+def conectividad(G):
+    if not nx.is_connected(G):
+        componentes = list(nx.connected_components(G))
+        maxComp = max(componentes, key=len)
+        gMax = G.subgraph(maxComp).copy()
+        return gMax, len(componentes), len(maxComp)
+    return G, 1, G.number_of_nodes()
 
 def create_community_node_colors(graph, communities):
     number_of_colors = len(communities)
