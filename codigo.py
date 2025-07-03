@@ -1,6 +1,5 @@
 import networkx as nx
 import pandas as pd
-import matplotlib.pyplot as plt
 import itertools 
 
 def cargarDatos(ruta_archivo):
@@ -16,13 +15,6 @@ def cargarDatos(ruta_archivo):
         if len(autores) > 1:
             pares_de_autores = itertools.combinations(autores, 2)
             coautorias.extend(list(pares_de_autores))
-            
-        # me acabo de dar cuenta que en el csv las filiaciones están sin separador porque en la pagina eran un newline y quedaron juntas
-        filiaciones = [filiacion.strip() for filiacion in row['Filiación'].split(';')]
-        
-        #hay un par que tienen Computatión, habría que ver si hay más typos
-        #habría que definir la pertenencia al dc porque filiaciones no es por autor, es en general del articulo. 
-        #otra opción es la más facil  (if (departamento de computación in filiacines[autor]) then dc.add(autor) else continue) y decir que es uan deficiencia del dataset
 
     return coautorias
 
@@ -41,21 +33,8 @@ def crear_grafo(coautorias, atributos):
     
     return g, weighted
 
-#devuelve el grafo entero o la componente conexa más grande
-def analizar_conectividad(G):
-    if not nx.is_connected(G):
-        componentes = list(nx.connected_components(G))
-        maxComp = max(componentes, key=len)
-        G = (G.subgraph(maxComp).copy())
-    return G
-
-def erdosDC(G):
-
-    investigadoresDC = [n for n, attr in G.nodes(data=True) if attr.get('dpto') == 'DC']
-    G_dc = G.subgraph(investigadoresDC).copy()
-    centralidadDC = nx.betweenness_centrality(G_dc)
-    erdos = max(centralidadDC, key=centralidadDC.get)
-    return erdos
+def neoErdos(G):
+    return  max(betweenness(G))
 
 def betweenness(G):
     betweennessNodos = nx.betweenness_centrality(G)
@@ -78,57 +57,17 @@ def create_community_node_colors(graph, communities):
             current_community_index += 1
     return node_colors
 
-def visualize_communities(graph, communities, i):
-    node_colors = create_community_node_colors(graph, communities)
-    modularity = round(nx.community.modularity(graph, communities), 6)
-    title = f"Community Visualization of {len(communities)} communities with modularity of {modularity}"
-    pos = nx.spring_layout(graph, k=0.3, iterations=50, seed=2)
-    plt.subplot(3, 1, i)
-    plt.title(title)
-    nx.draw(
-        graph,
-        pos=pos,
-        node_size=1000,
-        node_color=node_colors,
-        with_labels=True,
-        font_size=20,
-        font_color="black",
-    )
-
-if __name__ == "__main__":
-
-    listaCoautorias, afiliaciones = cargarDatos('articles.csv')
- 
-    g, weighted = crear_grafo(listaCoautorias, afiliaciones)
-            
-    maxComp = analizar_conectividad(g) #puede ser G entero
-
-    distPromedio = nx.average_short_path_length(maxComp)
-    diametro = nx.diameter(maxComp) 
+def visualize_communities(g, communities):
+    modularity = round(nx.community.modularity(g, communities), 4)
+    fig_comm, ax_comm = plt.subplots(figsize=(16, 12))
     
+    node_colors = cod.create_community_node_colors(g, communities)
+    pos = nx.spring_layout(g, k=0.3, iterations=50, seed=42)
     
-    clusterCoeff = nx.average_clustering(G)
-    puentes = list(nx.bridges((maxComp)))
-    nodosOrdenadosCentralidad = betweenness(maxComp)
-    tieStrength(weighted.subgraph(maxComp.nodes())) #no está hecho
-    homofiliaDpto = nx.attribute_assortativity_coefficient(maxComp, 'dpto')
-    #https://networkx.org/documentation/stable/auto_examples/algorithms/plot_girvan_newman.html
-    communities = list(nx.community.girvan_newman(maxComp)) 
-    modularity_df = pd.DataFrame(
-    [
-        [k + 1, nx.community.modularity(maxComp, communities[k])] 
-        for k in range(len(communities))
-    ],
-    columns=["k", "modularity"],
-    )
-    fig, ax = plt.subplots(3, figsize=(15, 20)) #3 es la cantidad de filas)
-    modularity_df.plot.bar(
-        x="k",
-        ax=ax[2],
-        color="#F2D140",
-        title="Modularity Trend for Girvan-Newman Community Detection",
-    )
-    #habría que ver que y cuantas comunidades visualizar
-    
+    nx.draw(g, pos, node_size=200, node_color=node_colors, with_labels=False, width=0.5, ax=ax_comm)
+    nx.draw_networkx_labels(g, pos, font_size=8, ax=ax_comm)
+    return modularity, fig_comm
+
+
 
 
