@@ -11,7 +11,7 @@ st.set_page_config(layout="wide")
 st.title('Análisis de la red de colaboraciones de la FCEyN')
 
 
-@st.cache_datas
+@st.cache_data
 def cargarYProcesar(ruta_archivo):
     listaCoautorias, afiliaciones = cod.cargarDatos(ruta_archivo)
     g, weighted = cod.crear_grafo(listaCoautorias, afiliaciones)
