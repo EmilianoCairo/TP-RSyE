@@ -6,6 +6,49 @@ import matplotlib.pyplot as plt
 import random
 
 
+def getBiography():
+ 
+    biografias = {
+        "Gros, E.G.": {
+            "imagen_url": "https://www.fundacionkonex.org/custom/web/data/imagenes/repositorio/2010/6/1/1261/2016031611120728e209b61a52482a0ae1cb9f5959c792.jpg",
+            "texto": """
+            Nació el 16/04/1931. Premio Konex de Platino 1983. Doctor en Química (Universidad de Buenos Aires). 
+            Fue becario posdoctoral en la Universidad de Minnesota (EE.UU.) e Investigador Superior del CONICET (PK). 
+            Entre 1967 y 1993, ocupó diversos cargos docentes y dirigió el Departamento de Química Orgánica en la Facultad de Ciencias Exactas, UBA. 
+            En 1978 fundó la Unidad de Microanálisis y Métodos Físicos Aplicados a Química Orgánica (UMYMFOR), donde desarrolló servicios para empresas nacionales y extranjeras. 
+            Presidió la Academia Nacional de Ciencias Exactas, Físicas y Naturales (1998-2002) e integró la Academia de Ciencias de América Latina. 
+            Publicó más de 200 trabajos de investigación en revistas internacionales. Fue el Director del LANAIS-EMAR desde 1992. 
+            Recibió, entre otros, el Premio de la Asociación Argentina de Biología Médica Nuclear en 1983. Falleció el 12/06/2001.
+            """
+        },
+        "Estrin, D.A.":{
+            "imagen_url": "https://www.fundacionkonex.org/custom/web/data/imagenes/repositorio/2013/4/30/3169/2016031612411001259a0cb2431834302abe2df60a1327.jpg",
+            "texto": """
+            Nació el 25/04/1962. Licenciado y Doctor en Ciencias Químicas (UBA 1986, UNLP 1989). 
+            Profesor titular de la Facultad de Ciencias Exactas y Naturales de la UBA. Investigador Principal de CONICET. 
+            Es coordinador del área Ciencias Químicas de la Agencia Nacional de Promoción Científica y Tecnológica. 
+            Autor de más de 130 publicaciones en el área de simulación computacional de sistemas químicos.
+            Dictó numerosas conferencias en foros nacionales e internacionales. Dirigió 12 tesis doctorales y varias de licenciatura. 
+            Fue miembro asociado del International Center for Theoretical Physics entre 1998 y 2005. Fue becario Guggenheim en 2007. 
+            Recibió el premio Ranwell Caputo de la Academia Nacional de Ciencias de Córdoba en 2001, y el premio Houssay de la Secretaría de Ciencia  y Técnica en 2003.
+            """
+        },
+        "Pietrasanta, L.I.":{
+            "imagen_url": "https://chanzuckerberg.com/wp-content/uploads/2021/11/LIA-PIETRASANTA3-Lia-Pietrasanta.jpg",
+            "texto": """
+            Doctora en Bioquímica por la Universidad Nacional del Sur (UNS). 
+            Realizó sus estudios posdoctorales en Estados Unidos, Alemania y Argentina, donde instaló y formó un grupo de investigación en la Universidad de Buenos Aires. 
+            Su investigación se centra en los aspectos biofísicos de la mecanotransducción celular. 
+            Coordinadora del Centro de Microscopía Avanzada de la Facultad de Ciencias Exactas y Naturales de la Universidad de Buenos Aires (2002-presente). 
+            Coordinadora del Sistema Nacional de Microscopía (SNM, 2011-presente). Presidenta (2017-2018) y expresidenta (2018-presente) de la Sociedad Argentina de Biofísica (SAB).
+            Miembra de la Sociedad Argentina de Microscopía (SAMIC, 2008-presente). Miembra de la Sociedad Argentina de Bioquímica y Biología Molecular (SAIB, 2007-presente).
+            Miembra del Consejo Científico del Centro Universitario Argentino-Alemán (CUAA-DAHZ, 2018-presente). Miembra del Comité Ejecutivo de Bioimagen Latinoamericana (LABI, 2021-presente).
+            """
+        }
+    }
+    return biografias
+
+
 def cargarDatos(ruta_archivo):
     df = pd.read_csv(ruta_archivo, sep=';', usecols=['Título', 'Autor']).drop_duplicates('Título')
     coautorias = []
@@ -22,6 +65,7 @@ def cargarDatos(ruta_archivo):
 
     return coautorias
 
+#
 def crear_grafo(coautorias):
     g = nx.Graph()
     g.add_edges_from(coautorias)
@@ -44,30 +88,6 @@ def conectividad(G):
         return gMax, len(componentes), len(maxComp)
     return G, 1, G.number_of_nodes()
 
-def neoErdos(G, centralidad_nodos):
-    return max(centralidad_nodos, key=centralidad_nodos.get)
-
-def betweennessAprox(G, k_samples):
-    centrality = nx.betweenness_centrality(G, k=k_samples, seed=42)
-    return centrality
-
-def estimate_edge_betweenness(G, node_betweenness):
-    edge_bw = {}
-    for u, v in G.edges():
-        edge_bw[(u, v)] = node_betweenness.get(u, 0) * node_betweenness.get(v, 0)
-    return edge_bw
-
-def girvan_newman_aprox(G, node_betweenness):
-    gCopy = G.copy()
-    
-    for _ in range(gCopy.number_of_edges()):
-        edge_bw = estimate_edge_betweenness(gCopy, node_betweenness)
-        if not edge_bw: break # No quedan aristas
-        
-        edge_to_remove = max(edge_bw, key=edge_bw.get)
-        gCopy.remove_edge(*edge_to_remove)
-        
-        yield tuple(c for c in nx.connected_components(gCopy))
 
 def create_community_node_colors(graph, communities):
     number_of_colors = len(communities)
