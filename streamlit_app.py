@@ -10,20 +10,24 @@ import itertools
 st.set_page_config(layout="wide")
 
 st.title('Análisis de la red de colaboraciones de la FCEyN')
-
+cache_dir = '.cache'
+os.makedirs(cache_dir, exist_ok=True) 
 
 @st.cache_data
 def cargarYProcesar(ruta_archivo):
-    if os.path.exists('/.cache/grafo.pkl') and os.path.exists('/.cache/conectividad.pkl'):
-        g = pickle.load(open('/.cache/grafo.pkl', 'rb'))
-        gMax, numComp, tamComp = pickle.load(open('/.cache/conectividad.pkl', 'rb'))
+    g_pkl = os.path.join(cache_dir, 'grafo_completo.pkl')
+    connect_pkl = os.path.join(cache_dir, 'conectividad.pkl')
+
+    if os.path.exists(g_pkl) and os.path.exists(connect_pkl):
+        g = pickle.load(open(g_pkl, 'rb'))
+        gMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
 
     else:
         listaCoautorias = cod.cargarDatos(ruta_archivo)
         g, _ = cod.crear_grafo(listaCoautorias)
-        pickle.dump(g, open('/.cache/grafo.pkl', 'wb'))
-        pickle.dump(cod.conectividad(g), open('/.cache/conectividad.pkl', 'wb'))
-        gMax, numComp, tamComp = pickle.load(open('/.cache/conectividad.pkl', 'rb'))
+        pickle.dump(g, open(g_pkl, 'wb'))
+        pickle.dump(cod.conectividad(g), open(connect_pkl, 'wb'))
+        gMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
 
 
     return gMax, numComp, tamComp
@@ -59,14 +63,16 @@ st.sidebar.metric("Coeficiente de Clustering", 0.81) #los hardcodee porque tarda
 
 @st.fragment
 def calcular_centralidad_aprox(_graph):
-    if os.path.exists('/.cache/centrality_cache.pkl'):
-        centrality_dict = pickle.load(open('/.cache/centrality_cache.pkl', 'rb'))
+    central_pkl = os.path.join(cache_dir, 'centrality_cache.pkl')
+
+    if os.path.exists(central_pkl):
+        centrality_dict = pickle.load(open(central_pkl, 'rb'))
 
     else:
         centrality_dict = {}
         for k in range(100, 1001, 100):
             centrality_dict[k] = nx.betweenness_centrality(_graph, k, seed=42)
-        pickle.dump(centrality_dict, open('/.cache/centrality_cache.pkl', 'wb'))
+        pickle.dump(centrality_dict, open(central_pkl, 'wb'))
         
     return centrality_dict
 
