@@ -115,7 +115,6 @@ def get_path_info(full_multigraph, simple_graph, start_author, end_author):
         path_info.append({"from": u, "to": v, "paper": paper_title})
     return {"path": path_info}
 
-
 def visualize_tie_strength_vs_overlap(graph_simple, graph_weighted, num_bins=30):
     #esto hay que revisar
     edge_data = []
@@ -186,62 +185,3 @@ def visualize_path_distribution(graph, samples=1000):
 
     return fig
 
-#esto fue una idea pero no la use al final. todo esto termino en el visualizador de caminos entre autores
-def visualize_ego_network(graph, central_author, distances):
-
-    nodes_by_distance = {}
-    for node, dist in distances.items():
-        if dist not in nodes_by_distance:
-            nodes_by_distance[dist] = []
-        nodes_by_distance[dist].append(node)
-
-    nodes_to_plot = {central_author}
-    
-    target_distance = 3
-    if target_distance in nodes_by_distance and len(nodes_by_distance[target_distance]) > 0:
-        endpoints = random.sample(nodes_by_distance[target_distance], 10)
-        for endpoint in endpoints:
-            try:
-                path = nx.shortest_path(graph, source=central_author, target=endpoint)
-                nodes_to_plot.update(path)
-            except nx.NetworkXNoPath:
-                continue
-
-    subgraph = graph.subgraph(nodes_to_plot)
-
-    fig = plt.figure(facecolor='#faf9f5')
-    
-    ax = fig.add_subplot(1, 1, 1)
-
-    ax.set_facecolor('#faf9f5') 
-    
-    pos = nx.nx_agraph.graphviz_layout(subgraph, prog='neato', args='-Gsplines=true -Goverlap=scale')
-
-    nx.draw_networkx(
-        subgraph,
-        pos=pos,
-        ax=ax,
-        with_labels=True,
-        font_size=4,
-        node_shape="s",
-        node_color="none",
-        edge_color = '#ccc6ba',
-        bbox=dict(facecolor='#faf9f5' ,edgecolor = '#faf9f5',boxstyle="round,pad=0.1")
-    )
-    nx.draw_networkx(
-            subgraph.subgraph([central_author]),
-            pos=pos,
-            ax=ax,
-            with_labels=True,
-            node_shape="s",
-            font_size=6,
-            node_color="none",
-            bbox=dict(facecolor='#cc7c5e',edgecolor = '#cc7c5e', boxstyle="round,pad=0.2")
-    )
-  
-    ax.axis('equal')
-    ax.axis('off')
-    
-    fig.tight_layout()
-
-    return fig
