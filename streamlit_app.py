@@ -62,8 +62,8 @@ def cargarYProcesar(ruta_archivo):
         gMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
 
     else:
-        listaCoautorias, _ = cod.cargar_datos(ruta_archivo)
-        g, _ = cod.crear_grafo(listaCoautorias)
+        listaCoautorias, attr = cod.cargar_datos(ruta_archivo)
+        g, _ = cod.crear_grafo(listaCoautorias, attr)
         pickle.dump(g, open(g_pkl, 'wb'))
         pickle.dump(cod.conectividad(g), open(connect_pkl, 'wb'))
         gMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
