@@ -4,7 +4,7 @@ enableStaticServing = true
 [theme]
 primaryColor="#cc7c5e"
 backgroundColor="#faf9f5"
-secondaryBackgroundColor="#ccc6ba"
+secondaryBackgroundColor="#E1DACD"
 textColor="#000000"
 font = 'Instrument Serif'
 

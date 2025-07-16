@@ -202,12 +202,12 @@ with tab2:
                 if "error" in path_data:
                     st.error(path_data["error"])
                 else:
-                    st.success("Camino encontrado:")
                     path_list = path_data["path"]
                     for i, step in enumerate(path_list):
-                        st.markdown(f"**Paso {i+1}:**")
-                        st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;**{step['from']}** colabora con **{step['to']}**")
-                        st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;*En el paper: {step['paper']}*")
+                        st.markdown(f"**{i+1}:** **{step['from']}** colabora con **{step['to']}** en el paper: *{step['paper']}*")
+                    #plot = cod.visualize_path_as_snake(path_data)
+                    #streamlit_bokeh(hv.render(plot, backend='bokeh'))
+
         else:
             st.warning("Por favor, ingrese un autor de origen y uno de destino.") 
     fig_overlap = cod.visualize_tie_strength_vs_overlap(gMax, g)

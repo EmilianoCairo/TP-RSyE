@@ -12,6 +12,30 @@ font_path = 'static/InstrumentSerif-Regular.ttf'
 font_manager.fontManager.addfont(font_path)
 plt.rcParams['font.family'] = 'Instrument Serif'
 
+
+def _apply_plot_style(plot, is_chart=False):
+    style_opts = {
+        'bgcolor': '#faf9f5',
+        'xaxis': {'grid': True, 'grid_line_dash': 'dashed', 'grid_line_color': '#e0e0e0'},
+        'yaxis': {'grid': True, 'grid_line_dash': 'dashed', 'grid_line_color': '#e0e0e0'},
+        'toolbar': 'above',
+        'height': 500,
+        'width': 700,
+    }
+    if is_chart:
+        style_opts.update({
+            'xlabel_text_color': '#333333',
+            'ylabel_text_color': '#333333',
+            'major_label_text_color': '#333333',
+            'title_text_color': '#333333',
+        })
+    else:
+        style_opts.update({
+             'xaxis': None, 'yaxis': None
+        })
+    return plot.opts(**style_opts)
+
+
 def apply_plot_style(ax, fig):
     ax.set_facecolor('#faf9f5')
     fig.set_facecolor('#faf9f5')
@@ -95,35 +119,61 @@ def conectividad(G):
         return g_max, len(componentes), len(max_comp)
     return G, 1, G.number_of_nodes()
 
-def get_path_info(full_multigraph, simple_graph, start_author, end_author): 
-    #esto se puede hacer mejor.
-    #podría ser un grafo? con los ejes con los titulos y los nodos con los autores??
+def get_path_info(full_multigraph, simple_graph, start_author, end_author):
     if start_author not in simple_graph:
         return {"error": f"El autor '{start_author}' no se encuentra en la red."}
     if end_author not in simple_graph:
         return {"error": f"El autor '{end_author}' no se encuentra en la red."}
-
     try:
         path = nx.shortest_path(simple_graph, source=start_author, target=end_author)
     except nx.NetworkXNoPath:
         return {"error": f"No existe un camino de colaboración entre {start_author} y {end_author}."}
-
     path_info = []
     for i in range(len(path) - 1):
-        u = path[i]
-        v = path[i+1]
-        
+        u, v = path[i], path[i+1]
         paper_title = "Colaboración sin título específico"
         if full_multigraph.has_edge(u, v):
             paper_title = full_multigraph.get_edge_data(u, v)[0].get('title', 'Sin Título')
-
-        path_info.append({
-            "from": u,
-            "to": v,
-            "paper": paper_title
-        })
-
+        path_info.append({"from": u, "to": v, "paper": paper_title})
     return {"path": path_info}
+
+def visualize_path_as_snake(path_info): #esto no se usa en la app, pero lo dejo por si acaso
+    path_list = path_info.get("path", [])
+
+    G = nx.DiGraph()
+    edge_titles = {}
+    for step in path_list:
+        u, v = step["from"], step["to"]
+        G.add_edge(u, v)
+        edge_titles[(u,v)] = step["paper"][:40] + '...' if len(step["paper"]) > 40 else step["paper"]
+
+    pos = {}
+    x, y, dx = 0, 0, 1
+    nodes_per_row = 4
+    path_nodes = [path_list[0]["from"]] + [step["to"] for step in path_list]
+    for i, node in enumerate(path_nodes):
+        pos[node] = (x, y)
+        if (i + 1) % nodes_per_row == 0 and i < len(path_nodes) - 1:
+            y -= 2.0
+            dx *= -1
+        else:
+            x += dx * 2.0
+
+    plot = hvnx.draw(
+        G,
+        pos,
+        node_size=1500,
+        node_shape='square',
+        node_color='#cc7c5e',
+        edge_width=2,
+        edge_color='#a6a6a6',
+        arrows=True
+    )
+    labels = hvnx.draw_labels(G, pos, font_size='10pt', font_color='white')
+    edge_labels_plot = hvnx.draw_edge_labels(G, pos, edge_labels=edge_titles, font_size='8pt', y_offset=0.1)
+
+    styled_plot = _apply_plot_style(plot * labels * edge_labels_plot)
+    return styled_plot
 
 def visualize_tie_strength_vs_overlap(graph_simple, graph_weighted, num_bins=30):
     #esto hay que revisar
@@ -194,9 +244,9 @@ def visualize_path_distribution(graph, samples=1000):
     ax.yaxis.set_minor_locator(NullLocator())
 
     return fig
-"""
-esto fue una idea pero no la use al final. todo esto termino en el visualizador de caminos entre autores
-def visualize_ego_network_handdrawn(graph, central_author, distances):
+
+#esto fue una idea pero no la use al final. todo esto termino en el visualizador de caminos entre autores
+def visualize_ego_network(graph, central_author, distances):
 
     nodes_by_distance = {}
     for node, dist in distances.items():
@@ -218,7 +268,6 @@ def visualize_ego_network_handdrawn(graph, central_author, distances):
 
     subgraph = graph.subgraph(nodes_to_plot)
 
-    # Create figure and axes
     fig = plt.figure(facecolor='#faf9f5')
     
     ax = fig.add_subplot(1, 1, 1)
@@ -255,4 +304,3 @@ def visualize_ego_network_handdrawn(graph, central_author, distances):
     fig.tight_layout()
 
     return fig
-"""
