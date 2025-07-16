@@ -1,21 +1,20 @@
 import streamlit as st
-import networkx as nx
-import pandas as pd
-import matplotlib.pyplot as plt
 import codigo as cod 
+import pandas as pd
 import dill as pickle
+import networkx as nx
 import os
-import itertools
+import html
 
 st.set_page_config(layout="wide")
 
 st.title('Análisis de la red de colaboraciones de la FCEyN')
 cache_dir = '.cache'
+images_dir = 'images'
 os.makedirs(cache_dir, exist_ok=True) 
-
 biografias = {
         "Gros, E.G.": {
-            "imagen_url": "images/gros_transparency.png",
+            "imagen_url": os.path.join(images_dir, 'gros_transparency.png'),
             "texto": """
             Nació el 16/04/1931. Premio Konex de Platino 1983. Doctor en Química (Universidad de Buenos Aires). 
             Fue becario posdoctoral en la Universidad de Minnesota (EE.UU.) e Investigador Superior del CONICET (PK). 
@@ -27,7 +26,7 @@ biografias = {
             """
         },
         "Estrin, D.A.":{
-            "imagen_url": "images/estrin_transp.png",
+            "imagen_url": os.path.join(images_dir, 'estrin_transp.png'),
             "texto": """
             Nació el 25/04/1962. Licenciado y Doctor en Ciencias Químicas (UBA 1986, UNLP 1989). 
             Profesor titular de la Facultad de Ciencias Exactas y Naturales de la UBA. Investigador Principal de CONICET. 
@@ -39,7 +38,7 @@ biografias = {
             """
         },
         "Pietrasanta, L.I.":{
-            "imagen_url": "images/pietrasanta_transparency.png",
+            "imagen_url": os.path.join(images_dir, 'pietrasanta_transparency.png'),
             "texto": """
             Doctora en Bioquímica por la Universidad Nacional del Sur (UNS). 
             Realizó sus estudios posdoctorales en Estados Unidos, Alemania y Argentina, donde instaló y formó un grupo de investigación en la Universidad de Buenos Aires. 
@@ -51,26 +50,27 @@ biografias = {
             """
         }
     }
+df_raw = pd.read_csv('articles.csv', sep=';', usecols=['Título', 'Autor', 'Filiación']).drop_duplicates('Título')
 
 @st.cache_data
 def cargarYProcesar(ruta_archivo):
-    g_pkl = os.path.join(cache_dir, 'grafo_completo.pkl')
-    connect_pkl = os.path.join(cache_dir, 'conectividad.pkl')
+    g_pkl = os.path.join(cache_dir, 'multigrafo_completo.pkl') #grafo_completo
+    connect_pkl = os.path.join(cache_dir, 'multiconectividad.pkl') #conectivad
+    w_pkl = os.path.join(cache_dir, 'weighted_Graph_completo.pkl') #grafo_completo
 
     if os.path.exists(g_pkl) and os.path.exists(connect_pkl):
         g = pickle.load(open(g_pkl, 'rb'))
-        gMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
+        wMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
 
     else:
-        listaCoautorias, attr = cod.cargar_datos(ruta_archivo)
-        g, _ = cod.crear_grafo(listaCoautorias, attr)
+        colaboraciones, atributos_autores = cod.cargar_datos(ruta_archivo)
+        g, w = cod.crear_grafo(colaboraciones, atributos_autores)
         pickle.dump(g, open(g_pkl, 'wb'))
-        pickle.dump(cod.conectividad(g), open(connect_pkl, 'wb'))
-        gMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
+        pickle.dump(w, open(w_pkl, 'wb'))
+        pickle.dump(cod.conectividad(w), open(connect_pkl, 'wb'))
+        wMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
 
-
-    return gMax, numComp, tamComp
-
+    return g, wMax, numComp, tamComp
 @st.cache_data
 def calcular_comunidades_aprox(_graph, _centrality, k):
     communities_generator = cod.girvan_newman_aprox(_graph, _centrality)
@@ -83,7 +83,7 @@ def centralidadAprox(_graph, k_samples):
     return cod.betweennessAprox(_graph, k_samples)
 
 
-gMax, numComp, tamComp  = cargarYProcesar('articles.csv')
+gMax, g,numComp, tamComp  = cargarYProcesar('articles.csv')
 
 st.sidebar.header("Métricas Generales")
 st.sidebar.metric("Total de Autores", gMax.number_of_nodes())
@@ -154,7 +154,7 @@ with col1:
 with col2:
     if nodosOrdenadosCentralidad:
         autor_principal = nodosOrdenadosCentralidad[0][0]
-        bio = cod.getBiography().get(autor_principal)
+        bio = biografias.get(autor_principal)
         st.markdown(f"![{autor_principal}]")            
         st.markdown(bio["texto"])
 #with tab3:
