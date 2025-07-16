@@ -13,28 +13,6 @@ font_manager.fontManager.addfont(font_path)
 plt.rcParams['font.family'] = 'Instrument Serif'
 
 
-def _apply_plot_style(plot, is_chart=False):
-    style_opts = {
-        'bgcolor': '#faf9f5',
-        'xaxis': {'grid': True, 'grid_line_dash': 'dashed', 'grid_line_color': '#e0e0e0'},
-        'yaxis': {'grid': True, 'grid_line_dash': 'dashed', 'grid_line_color': '#e0e0e0'},
-        'toolbar': 'above',
-        'height': 500,
-        'width': 700,
-    }
-    if is_chart:
-        style_opts.update({
-            'xlabel_text_color': '#333333',
-            'ylabel_text_color': '#333333',
-            'major_label_text_color': '#333333',
-            'title_text_color': '#333333',
-        })
-    else:
-        style_opts.update({
-             'xaxis': None, 'yaxis': None
-        })
-    return plot.opts(**style_opts)
-
 
 def apply_plot_style(ax, fig):
     ax.set_facecolor('#faf9f5')
@@ -137,43 +115,6 @@ def get_path_info(full_multigraph, simple_graph, start_author, end_author):
         path_info.append({"from": u, "to": v, "paper": paper_title})
     return {"path": path_info}
 
-def visualize_path_as_snake(path_info): #esto no se usa en la app, pero lo dejo por si acaso
-    path_list = path_info.get("path", [])
-
-    G = nx.DiGraph()
-    edge_titles = {}
-    for step in path_list:
-        u, v = step["from"], step["to"]
-        G.add_edge(u, v)
-        edge_titles[(u,v)] = step["paper"][:40] + '...' if len(step["paper"]) > 40 else step["paper"]
-
-    pos = {}
-    x, y, dx = 0, 0, 1
-    nodes_per_row = 4
-    path_nodes = [path_list[0]["from"]] + [step["to"] for step in path_list]
-    for i, node in enumerate(path_nodes):
-        pos[node] = (x, y)
-        if (i + 1) % nodes_per_row == 0 and i < len(path_nodes) - 1:
-            y -= 2.0
-            dx *= -1
-        else:
-            x += dx * 2.0
-
-    plot = hvnx.draw(
-        G,
-        pos,
-        node_size=1500,
-        node_shape='square',
-        node_color='#cc7c5e',
-        edge_width=2,
-        edge_color='#a6a6a6',
-        arrows=True
-    )
-    labels = hvnx.draw_labels(G, pos, font_size='10pt', font_color='white')
-    edge_labels_plot = hvnx.draw_edge_labels(G, pos, edge_labels=edge_titles, font_size='8pt', y_offset=0.1)
-
-    styled_plot = _apply_plot_style(plot * labels * edge_labels_plot)
-    return styled_plot
 
 def visualize_tie_strength_vs_overlap(graph_simple, graph_weighted, num_bins=30):
     #esto hay que revisar
