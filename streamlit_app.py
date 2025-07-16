@@ -10,11 +10,11 @@ st.set_page_config(layout="wide")
 
 st.title('Análisis de la red de colaboraciones de la FCEyN')
 cache_dir = '.cache'
+images_dir = 'images'
 os.makedirs(cache_dir, exist_ok=True) 
-
 biografias = {
         "Gros, E.G.": {
-            "imagen_url": "images/gros_transparency.png",
+            "imagen_url": os.path.join(images_dir, 'gros_transparency.png'),
             "texto": """
             Nació el 16/04/1931. Premio Konex de Platino 1983. Doctor en Química (Universidad de Buenos Aires). 
             Fue becario posdoctoral en la Universidad de Minnesota (EE.UU.) e Investigador Superior del CONICET (PK). 
@@ -26,7 +26,7 @@ biografias = {
             """
         },
         "Estrin, D.A.":{
-            "imagen_url": "images/estrin_transp.png",
+            "imagen_url": os.path.join(images_dir, 'estrin_transp.png'),
             "texto": """
             Nació el 25/04/1962. Licenciado y Doctor en Ciencias Químicas (UBA 1986, UNLP 1989). 
             Profesor titular de la Facultad de Ciencias Exactas y Naturales de la UBA. Investigador Principal de CONICET. 
@@ -38,7 +38,7 @@ biografias = {
             """
         },
         "Pietrasanta, L.I.":{
-            "imagen_url": "images/pietrasanta_transparency.png",
+            "imagen_url": os.path.join(images_dir, 'pietrasanta_transparency.png'),
             "texto": """
             Doctora en Bioquímica por la Universidad Nacional del Sur (UNS). 
             Realizó sus estudios posdoctorales en Estados Unidos, Alemania y Argentina, donde instaló y formó un grupo de investigación en la Universidad de Buenos Aires. 
