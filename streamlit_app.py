@@ -13,20 +13,6 @@ st.title('Análisis de la red de colaboraciones de la FCEyN')
 cache_dir = '.cache'
 os.makedirs(cache_dir, exist_ok=True) 
 
-import streamlit as st
-import codigo as cod 
-import pandas as pd
-import dill as pickle
-import networkx as nx
-import os
-import html
-
-st.set_page_config(layout="wide")
-
-st.title('Análisis de la red de colaboraciones de la FCEyN')
-cache_dir = '.cache'
-os.makedirs(cache_dir, exist_ok=True) 
-
 biografias = {
         "Gros, E.G.": {
             "imagen_url": "images/gros_transparency.png",
@@ -76,7 +62,7 @@ def cargarYProcesar(ruta_archivo):
         gMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
 
     else:
-        listaCoautorias = cod.cargarDatos(ruta_archivo)
+        listaCoautorias, _ = cod.cargar_datos(ruta_archivo)
         g, _ = cod.crear_grafo(listaCoautorias)
         pickle.dump(g, open(g_pkl, 'wb'))
         pickle.dump(cod.conectividad(g), open(connect_pkl, 'wb'))
