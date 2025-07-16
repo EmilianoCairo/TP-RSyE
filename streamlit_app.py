@@ -13,6 +13,59 @@ st.title('Análisis de la red de colaboraciones de la FCEyN')
 cache_dir = '.cache'
 os.makedirs(cache_dir, exist_ok=True) 
 
+import streamlit as st
+import codigo as cod 
+import pandas as pd
+import dill as pickle
+import networkx as nx
+import os
+import html
+
+st.set_page_config(layout="wide")
+
+st.title('Análisis de la red de colaboraciones de la FCEyN')
+cache_dir = '.cache'
+os.makedirs(cache_dir, exist_ok=True) 
+
+biografias = {
+        "Gros, E.G.": {
+            "imagen_url": "images/gros_transparency.png",
+            "texto": """
+            Nació el 16/04/1931. Premio Konex de Platino 1983. Doctor en Química (Universidad de Buenos Aires). 
+            Fue becario posdoctoral en la Universidad de Minnesota (EE.UU.) e Investigador Superior del CONICET (PK). 
+            Entre 1967 y 1993, ocupó diversos cargos docentes y dirigió el Departamento de Química Orgánica en la Facultad de Ciencias Exactas, UBA. 
+            En 1978 fundó la Unidad de Microanálisis y Métodos Físicos Aplicados a Química Orgánica (UMYMFOR), donde desarrolló servicios para empresas nacionales y extranjeras. 
+            Presidió la Academia Nacional de Ciencias Exactas, Físicas y Naturales (1998-2002) e integró la Academia de Ciencias de América Latina. 
+            Publicó más de 200 trabajos de investigación en revistas internacionales. Fue el Director del LANAIS-EMAR desde 1992. 
+            Recibió, entre otros, el Premio de la Asociación Argentina de Biología Médica Nuclear en 1983. Falleció el 12/06/2001.
+            """
+        },
+        "Estrin, D.A.":{
+            "imagen_url": "images/estrin_transp.png",
+            "texto": """
+            Nació el 25/04/1962. Licenciado y Doctor en Ciencias Químicas (UBA 1986, UNLP 1989). 
+            Profesor titular de la Facultad de Ciencias Exactas y Naturales de la UBA. Investigador Principal de CONICET. 
+            Es coordinador del área Ciencias Químicas de la Agencia Nacional de Promoción Científica y Tecnológica. 
+            Autor de más de 130 publicaciones en el área de simulación computacional de sistemas químicos.
+            Dictó numerosas conferencias en foros nacionales e internacionales. Dirigió 12 tesis doctorales y varias de licenciatura. 
+            Fue miembro asociado del International Center for Theoretical Physics entre 1998 y 2005. Fue becario Guggenheim en 2007. 
+            Recibió el premio Ranwell Caputo de la Academia Nacional de Ciencias de Córdoba en 2001, y el premio Houssay de la Secretaría de Ciencia  y Técnica en 2003.
+            """
+        },
+        "Pietrasanta, L.I.":{
+            "imagen_url": "images/pietrasanta_transparency.png",
+            "texto": """
+            Doctora en Bioquímica por la Universidad Nacional del Sur (UNS). 
+            Realizó sus estudios posdoctorales en Estados Unidos, Alemania y Argentina, donde instaló y formó un grupo de investigación en la Universidad de Buenos Aires. 
+            Su investigación se centra en los aspectos biofísicos de la mecanotransducción celular. 
+            Coordinadora del Centro de Microscopía Avanzada de la Facultad de Ciencias Exactas y Naturales de la Universidad de Buenos Aires (2002-presente). 
+            Coordinadora del Sistema Nacional de Microscopía (SNM, 2011-presente). Presidenta (2017-2018) y expresidenta (2018-presente) de la Sociedad Argentina de Biofísica (SAB).
+            Miembra de la Sociedad Argentina de Microscopía (SAMIC, 2008-presente). Miembra de la Sociedad Argentina de Bioquímica y Biología Molecular (SAIB, 2007-presente).
+            Miembra del Consejo Científico del Centro Universitario Argentino-Alemán (CUAA-DAHZ, 2018-presente). Miembra del Comité Ejecutivo de Bioimagen Latinoamericana (LABI, 2021-presente).
+            """
+        }
+    }
+
 @st.cache_data
 def cargarYProcesar(ruta_archivo):
     g_pkl = os.path.join(cache_dir, 'grafo_completo.pkl')
@@ -116,7 +169,7 @@ with col2:
     if nodosOrdenadosCentralidad:
         autor_principal = nodosOrdenadosCentralidad[0][0]
         bio = cod.getBiography().get(autor_principal)
-        st.markdown(f"![{autor_principal}]({bio["imagen_url"]})")            
+        st.markdown(f"![{autor_principal}]")            
         st.markdown(bio["texto"])
 #with tab3:
 #    st.header("Detección de Comunidades (Aproximación de Girvan-Newman)")

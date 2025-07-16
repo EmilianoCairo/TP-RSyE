@@ -1,117 +1,181 @@
 import networkx as nx
 import pandas as pd
 import itertools 
-import numpy as np
-import matplotlib.pyplot as plt
+from collections import Counter
+from matplotlib.ticker import LogLocator, NullLocator
+from matplotlib import pyplot as plt
 import random
+import base64
 
 
-def getBiography():
- 
-    biografias = {
-        "Gros, E.G.": {
-            "imagen_url": "https://www.fundacionkonex.org/custom/web/data/imagenes/repositorio/2010/6/1/1261/2016031611120728e209b61a52482a0ae1cb9f5959c792.jpg",
-            "texto": """
-            Nació el 16/04/1931. Premio Konex de Platino 1983. Doctor en Química (Universidad de Buenos Aires). 
-            Fue becario posdoctoral en la Universidad de Minnesota (EE.UU.) e Investigador Superior del CONICET (PK). 
-            Entre 1967 y 1993, ocupó diversos cargos docentes y dirigió el Departamento de Química Orgánica en la Facultad de Ciencias Exactas, UBA. 
-            En 1978 fundó la Unidad de Microanálisis y Métodos Físicos Aplicados a Química Orgánica (UMYMFOR), donde desarrolló servicios para empresas nacionales y extranjeras. 
-            Presidió la Academia Nacional de Ciencias Exactas, Físicas y Naturales (1998-2002) e integró la Academia de Ciencias de América Latina. 
-            Publicó más de 200 trabajos de investigación en revistas internacionales. Fue el Director del LANAIS-EMAR desde 1992. 
-            Recibió, entre otros, el Premio de la Asociación Argentina de Biología Médica Nuclear en 1983. Falleció el 12/06/2001.
-            """
-        },
-        "Estrin, D.A.":{
-            "imagen_url": "https://www.fundacionkonex.org/custom/web/data/imagenes/repositorio/2013/4/30/3169/2016031612411001259a0cb2431834302abe2df60a1327.jpg",
-            "texto": """
-            Nació el 25/04/1962. Licenciado y Doctor en Ciencias Químicas (UBA 1986, UNLP 1989). 
-            Profesor titular de la Facultad de Ciencias Exactas y Naturales de la UBA. Investigador Principal de CONICET. 
-            Es coordinador del área Ciencias Químicas de la Agencia Nacional de Promoción Científica y Tecnológica. 
-            Autor de más de 130 publicaciones en el área de simulación computacional de sistemas químicos.
-            Dictó numerosas conferencias en foros nacionales e internacionales. Dirigió 12 tesis doctorales y varias de licenciatura. 
-            Fue miembro asociado del International Center for Theoretical Physics entre 1998 y 2005. Fue becario Guggenheim en 2007. 
-            Recibió el premio Ranwell Caputo de la Academia Nacional de Ciencias de Córdoba en 2001, y el premio Houssay de la Secretaría de Ciencia  y Técnica en 2003.
-            """
-        },
-        "Pietrasanta, L.I.":{
-            "imagen_url": "https://chanzuckerberg.com/wp-content/uploads/2021/11/LIA-PIETRASANTA3-Lia-Pietrasanta.jpg",
-            "texto": """
-            Doctora en Bioquímica por la Universidad Nacional del Sur (UNS). 
-            Realizó sus estudios posdoctorales en Estados Unidos, Alemania y Argentina, donde instaló y formó un grupo de investigación en la Universidad de Buenos Aires. 
-            Su investigación se centra en los aspectos biofísicos de la mecanotransducción celular. 
-            Coordinadora del Centro de Microscopía Avanzada de la Facultad de Ciencias Exactas y Naturales de la Universidad de Buenos Aires (2002-presente). 
-            Coordinadora del Sistema Nacional de Microscopía (SNM, 2011-presente). Presidenta (2017-2018) y expresidenta (2018-presente) de la Sociedad Argentina de Biofísica (SAB).
-            Miembra de la Sociedad Argentina de Microscopía (SAMIC, 2008-presente). Miembra de la Sociedad Argentina de Bioquímica y Biología Molecular (SAIB, 2007-presente).
-            Miembra del Consejo Científico del Centro Universitario Argentino-Alemán (CUAA-DAHZ, 2018-presente). Miembra del Comité Ejecutivo de Bioimagen Latinoamericana (LABI, 2021-presente).
-            """
-        }
-    }
-    return biografias
+def apply_plot_style(ax, fig):
+    ax.set_facecolor('#faf9f5')
+    fig.set_facecolor('#faf9f5')
+    ax.spines['left'].set_color('#cc7c5e')
+    ax.spines['bottom'].set_color('#cc7c5e')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.tick_params(axis='both', color='#cc7c5e')
 
+def image_to_base64(path):
+    with open(path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode()
+    return f"data:image/png;base64,{encoded_string}"
 
-def cargarDatos(ruta_archivo):
-    df = pd.read_csv(ruta_archivo, sep=';', usecols=['Título', 'Autor']).drop_duplicates('Título')
-    coautorias = []
+def es_afiliacion_dc(filiacion_texto): #esto funciona muy mal.
+    if not isinstance(filiacion_texto, str):
+        return False
+    texto = filiacion_texto.lower()
+
+    keywords_dc = ('computación', 'computation', 'computer', 'comp', 'computacion', 'computation', 'computacin')
+    keywords_institucion = ('exactas y naturales', 'fcen', 'fceyn', 'buenos aires', 'uba', 'universidad de buenos aires', 'facultad de ciencias exactas y naturales')
+
+    dc = any(keyword in texto for keyword in keywords_dc)
+    institucion = any(keyword in texto for keyword in keywords_institucion)
+
+    return dc and institucion
+
+def cargar_datos(ruta_archivo):
+    df = pd.read_csv(ruta_archivo, sep=';', usecols=['Título', 'Autor', 'Filiación']).drop_duplicates('Título')
+    df['is_dc'] = df['Filiación'].apply(es_afiliacion_dc)
+
+    autores_dc = set(
+        df[df['is_dc']]
+        .dropna(subset=['Autor'])['Autor']
+        .str.split(';')
+        .explode()
+        .str.strip()
+    )
+
+    colaboraciones = []
+    todos_los_autores = set()
     
-    for _, row in df.iterrows():
-        if pd.isna(row['Autor']):
+    for row in df.itertuples(index=False):
+        if pd.isna(row.Autor):
             continue
             
-        autores = [autor.strip() for autor in row['Autor'].split(';')]
-        if 'et al.' in autores: autores.remove('et al.') 
+        autores_raw = [autor.strip() for autor in row.Autor.split(';')]
+        autores = [autor for autor in autores_raw if autor.lower() != 'et al.']
+        
+        todos_los_autores.update(autores)
+        
         if len(autores) > 1:
-            pares_de_autores = itertools.combinations(autores, 2)
-            coautorias.extend(list(pares_de_autores))
+            for autor1, autor2 in itertools.combinations(autores, 2):
+                colaboraciones.append((autor1, autor2, {'title': getattr(row, 'Título', 'Sin Título')}))
 
-    return coautorias
+    atributos_autores = {autor: {'dc_collaborator': autor in autores_dc} for autor in todos_los_autores}
 
-#
-def crear_grafo(coautorias):
-    g = nx.Graph()
-    g.add_edges_from(coautorias)
+    return colaboraciones, atributos_autores
 
-    weighted = nx.Graph()
-    for autor1, autor2 in coautorias:
-        if weighted.has_edge(autor1, autor2):
-            weighted[autor1][autor2]['weight'] += 1
-        else:
-            weighted.add_edge(autor1, autor2, weight=1)
+def crear_grafo(colaboraciones, atributos):
+    g = nx.MultiGraph()
+    g.add_edges_from(colaboraciones)
+    nx.set_node_attributes(g, atributos)
     
-    return g, weighted
+    w = nx.Graph()
+    for u, v, data in g.edges(data=True):
+        if w.has_edge(u, v):
+            w[u][v]['weight'] += 1
+        else:
+            w.add_edge(u, v, weight=1)
+    
+    nx.set_node_attributes(w, atributos)
 
+    return g, w
 
 def conectividad(G):
     if not nx.is_connected(G):
         componentes = list(nx.connected_components(G))
-        maxComp = max(componentes, key=len)
-        gMax = G.subgraph(maxComp).copy()
-        return gMax, len(componentes), len(maxComp)
+        max_comp = max(componentes, key=len)
+        g_max = G.subgraph(max_comp).copy()
+        return g_max, len(componentes), len(max_comp)
     return G, 1, G.number_of_nodes()
 
+def get_path_info(full_multigraph, simple_graph, start_author, end_author):
+    if start_author not in simple_graph:
+        return {"error": f"El autor '{start_author}' no se encuentra en la red."}
+    if end_author not in simple_graph:
+        return {"error": f"El autor '{end_author}' no se encuentra en la red."}
+    try:
+        path = nx.shortest_path(simple_graph, source=start_author, target=end_author)
+    except nx.NetworkXNoPath:
+        return {"error": f"No existe un camino de colaboración entre {start_author} y {end_author}."}
+    path_info = []
+    for i in range(len(path) - 1):
+        u, v = path[i], path[i+1]
+        paper_title = "Colaboración sin título específico"
+        if full_multigraph.has_edge(u, v):
+            paper_title = full_multigraph.get_edge_data(u, v)[0].get('title', 'Sin Título')
+        path_info.append({"from": u, "to": v, "paper": paper_title})
+    return {"path": path_info}
 
-def create_community_node_colors(graph, communities):
-    number_of_colors = len(communities)
-    colors = ["#D4FCB1", "#CDC5FC", "#FFC2C4", "#F2D140", "#BCC6C8", "#F4A261", "#2A9D8F", "#E9C46A", "#E76F51", "#264653"]
-    colors = (colors * (number_of_colors // len(colors) + 1))[:number_of_colors]
-    node_colors = {}
-    for i, community in enumerate(communities):
-        for node in community:
-            node_colors[node] = colors[i]
-    return [node_colors.get(node, "#808080") for node in graph.nodes()]
+def visualize_tie_strength_vs_overlap(graph_simple, graph_weighted, num_bins=30):
+    #esto hay que revisar
+    edge_data = []
+    for u, v in graph_simple.edges():
+        edge_attrs = graph_weighted.get_edge_data(u, v, default={'weight': 1})
+        strength = edge_attrs.get('weight', 1)
+        
+        neighbors_u = set(graph_simple.neighbors(u))
+        neighbors_v = set(graph_simple.neighbors(v))
+        intersection_size = len(neighbors_u.intersection(neighbors_v))
+        union_size = len(neighbors_u.union(neighbors_v))
+        
+        if union_size == 0:
+            overlap = 0
+        else:
+            overlap = intersection_size / union_size
+            
+        edge_data.append({'strength': strength, 'overlap': overlap})
 
-def visualize_communities(graph, communities):
-    modularity = round(nx.community.modularity(graph, communities), 4)
-    fig, ax = plt.subplots(figsize=(16, 12))
+    df = pd.DataFrame(edge_data)
+    df_sorted = df.sort_values(by='strength').reset_index(drop=True)
+    df_sorted['percentile'] = (df_sorted.index + 1) / len(df_sorted)
+    df_sorted['bin'] = pd.cut(df_sorted['percentile'], bins=num_bins, labels=False)
+    binned_data = df_sorted.groupby('bin').agg(
+        avg_percentile=('percentile', 'mean'),
+        avg_overlap=('overlap', 'mean')
+    ).dropna()
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    apply_plot_style(ax, fig)
+
+    ax.plot(binned_data['avg_percentile'], binned_data['avg_overlap'], marker='o', linestyle='-', color='#cc7c5e')
     
-    node_colors = create_community_node_colors(graph, communities)
-    pos = nx.spring_layout(graph, k=0.3, iterations=50, seed=42)
-    
-    nx.draw(graph, pos, node_size=200, node_color=node_colors, with_labels=False, width=0.5, ax=ax)
-    nx.draw_networkx_labels(graph, pos, font_size=8, ax=ax)
-    ax.set_title(f"Visualización con {len(communities)} comunidades (Modularidad: {modularity})")
-    
+    ax.set_xlabel("$P_{cum}$")
+    ax.set_ylabel("$<O>_w$")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(bottom=0)
+
     return fig
 
+def visualize_path_distribution(graph, samples=1000):
+    plt.close('all')
+    all_path_lengths = []
+    
+    node_list = list(graph.nodes())
+    nodes_to_sample = random.sample(node_list, min(samples, len(node_list)))
 
+    for source_node in nodes_to_sample:
+        path_lengths = nx.single_source_shortest_path_length(graph, source_node)
+        all_path_lengths.extend(path_lengths.values())
 
+    path_counts = Counter(length for length in all_path_lengths if length > 0)
+
+    total_paths = sum(path_counts.values())
+    lengths = sorted(path_counts.keys())
+    probabilities = [path_counts[length] / total_paths for length in lengths]
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    apply_plot_style(ax, fig)
+
+    ax.plot(lengths, probabilities, marker='o', linestyle='-', color='#cc7c5e')
+    ax.set_yscale('log')
+    
+    ax.set_xlabel("Longitud del camino", color='#000000')
+    ax.set_ylabel("Probabilidad", color='#000000')
+    ax.yaxis.set_major_locator(LogLocator(base=10.0))
+    ax.yaxis.set_minor_locator(NullLocator())
+
+    return fig
 

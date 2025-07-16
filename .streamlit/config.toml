@@ -1,0 +1,17 @@
+[server]
+enableStaticServing = true
+
+[theme]
+primaryColor="#cc7c5e"
+backgroundColor="#faf9f5"
+secondaryBackgroundColor="#E1DACD"
+textColor="#000000"
+font = 'Instrument Serif'
+
+[[theme.fontFaces]]
+family= 'Instrument Serif'
+url= "InstrumentSerif-Regular.ttf"
+style= "normal"
+
+
+
