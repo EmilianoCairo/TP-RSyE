@@ -4,8 +4,6 @@ import pandas as pd
 import dill as pickle
 import networkx as nx
 import os
-import matplotlib.pyplot as plt
-import itertools
 import html
 
 st.set_page_config(layout="wide")

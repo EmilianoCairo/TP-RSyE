@@ -1,7 +1,6 @@
 import networkx as nx
 import pandas as pd
 import itertools 
-import numpy as np
 from collections import Counter
 from matplotlib.ticker import LogLocator, NullLocator
 from matplotlib import font_manager, pyplot as plt

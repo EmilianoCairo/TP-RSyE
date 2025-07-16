@@ -20,7 +20,7 @@ MarkupSafe==3.0.2
 matplotlib==3.10.3
 narwhals==1.47.0
 networkx==3.5
-numpy==2.3.1
+numpy==1.26.4
 packaging==25.0
 pandas==2.3.1
 pillow==11.3.0
