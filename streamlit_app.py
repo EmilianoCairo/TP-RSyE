@@ -128,28 +128,90 @@ st.sidebar.metric("Coeficiente de Clustering", 0.81) #los hardcodee porque tarda
 tab1, tab2, tab3 = st.tabs(["Análisis de Colaboración (Aristas)", "Análisis de Centralidad (Nodos)", "Análisis de Comunidades"])
 
 all_centralities = calcular_centralidad_aprox(g)
-with tab2:
-    k_seleccionado = st.slider("Precisión de Centralidad (k muestras)", min_value=100, max_value=1000, value=500, step=100)
 
+with tab1:
+    st.header("Análisis de Colaboración por Tipo de Arista")
+    
+    #st.write("Este análisis clasifica cada colaboración (arista) para entender cómo interactúa el DC con otros departamentos.")
+    #
+    #col1, col2 = st.columns(2)
+    #with col1:
+    #    st.subheader("Distribución de Tipos de Colaboración")
+    #    df_tipos = cod.analizar_tipos_de_arista(gMax)
+    #    st.dataframe(df_tipos)
+    #    st.bar_chart(df_tipos)
+    #with col2:
+    #    st.subheader("Fuerza Promedio del Lazo por Tipo")
+    #    df_fuerza = cod.analizar_fuerza_por_tipo(weighted.subgraph(gMax.nodes()))
+    #    st.dataframe(df_fuerza)
+    #    st.bar_chart(df_fuerza)
+    #
+    #st.divider()
+    #st.subheader("Embajadores del DC")
+    #st.write("Autores del DC con el mayor número de colaboraciones interdepartamentales, actuando como puentes.")
+    #df_embajadores = cod.encontrar_embajadores_dc(gMax)
+    #st.dataframe(df_embajadores)   
+
+with tab2:
+
+    k_seleccionado = st.slider("Precisión de Centralidad (k muestras)", min_value=100, max_value=1000, value=500, step=100)
     col1, col2 = st.columns([1, 2])
     with col1:
         st.subheader("Autores más Centrales")
-
         centralidad_aprox = all_centralities[k_seleccionado]
         nodosOrdenadosCentralidad = sorted(centralidad_aprox.items(), key=lambda x: x[1], reverse=True)
 
-        dfCentralidad = pd.DataFrame(centralidad_aprox.items(), columns=['Autor', 'Centralidad Aprox.'])
-        dfCentralidad_sorted = dfCentralidad.sort_values(by='Centralidad Aprox.', ascending=False).reset_index(drop=True)
+        dfCentralidad = pd.DataFrame(centralidad_aprox.items(), columns=['Autor', 'Centralidad'])
+        dfCentralidad_sorted = dfCentralidad.sort_values(by='Centralidad', ascending=False).reset_index(drop=True)
 
-        st.dataframe(dfCentralidad_sorted.head(10))
-
-
+        autor_principal = nodosOrdenadosCentralidad[0][0]
+        st.dataframe(dfCentralidad_sorted)
+    bio = biografias.get(autor_principal)
     with col2:
-        if nodosOrdenadosCentralidad:
-            autor_principal = nodosOrdenadosCentralidad[0][0]
-            bio = biografias.get(autor_principal)
-            st.markdown(f"![{autor_principal}]")            
-            st.markdown(bio["texto"])
+        #suele quedar un poquito de lugar abajo de los autores, 
+        #capaz poner los papers más citados de c/uno? de google scholar se pude sacar ya sea manual o con un script. 
+        st.subheader(f"Biografía de {autor_principal}")
+        image_data_url = cod.image_to_base64(bio["imagen_url"] )
+        st.markdown(f"""
+            <div style="overflow: auto;">
+                <img src="{image_data_url}" alt="biography picture"
+                     style="
+                        float: left;
+                        width: 180px;
+                        shape-outside: url('{image_data_url}');
+                        shape-margin: 10px;
+                        border-radius: 10px;
+                        margin-right: 200px;
+                     ">                
+                <p style="text-align: justify; font-size: 0.9em; color: #31333f;">
+                    {html.escape(bio["texto"].replace('\n', ' '))}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+    distancias = nx.shortest_path_length(g, source=autor_principal)
+    df_distancias = pd.DataFrame(distancias.items(), columns=['Autor', 'Distancia a ' + autor_principal])
+    autor_origen = st.text_input("Autor de Origen:", value="Feuerstein, E.")
+    autor_destino = st.text_input("Autor de Destino:", value=autor_principal)
+    if st.button("Trazar Camino"):
+        if autor_origen and autor_destino:
+            with st.spinner("Buscando el camino de colaboración..."):
+                path_data = cod.get_path_info(gMax, g, autor_origen, autor_destino)
+                if "error" in path_data:
+                    st.error(path_data["error"])
+                else:
+                    path_list = path_data["path"]
+                    for i, step in enumerate(path_list):
+                        st.markdown(f"**{i+1}:** **{step['from']}** colabora con **{step['to']}** en el paper: *{step['paper']}*")
+
+        else:
+            st.warning("Por favor, ingrese un autor de origen y uno de destino.") 
+    fig_overlap = cod.visualize_tie_strength_vs_overlap(gMax, g)
+    st.subheader("Relación entre Fuerza de Lazo y Estructura de Red")
+
+    st.pyplot(fig_overlap)
+
+
 with tab3:
     st.header("Análisis Estructural de la Red")
     #st.header("Detección de Comunidades (Girvan-Newman Aproximado)")
@@ -168,6 +230,7 @@ with tab3:
     #mostrar_comunidades(k_comunidades_slider, k_seleccionado)
     fig = distribucionDeDistancias(gMax)
     st.pyplot(fig, clear_figure=True)
+
 
 
 
