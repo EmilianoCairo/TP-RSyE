@@ -71,6 +71,7 @@ def cargarYProcesar(ruta_archivo):
         wMax, numComp, tamComp = pickle.load(open(connect_pkl, 'rb'))
 
     return g, wMax, numComp, tamComp
+
 @st.cache_data
 def calcular_comunidades_aprox(_graph, _centrality, k):
     communities_generator = cod.girvan_newman_aprox(_graph, _centrality)
@@ -82,25 +83,18 @@ def calcular_comunidades_aprox(_graph, _centrality, k):
 def centralidadAprox(_graph, k_samples):
     return cod.betweennessAprox(_graph, k_samples)
 
+def distribucionDeDistancias(_graph):
+    graph_pkl = os.path.join(cache_dir, 'distancesGraph.pkl')
+    if not os.path.exists(graph_pkl):
+        pickle.dump(cod.visualize_path_distribution(_graph), open(graph_pkl, 'wb'))
+    return pickle.load(open(graph_pkl, 'rb'))
 
-gMax, g,numComp, tamComp  = cargarYProcesar('articles.csv')
+def calcular_ego_network(_gMax, autor_principal, distancias):
+    ego_pkl = os.path.join(cache_dir, 'ego_network.pkl')
+    if not os.path.exists(ego_pkl):
+        pickle.dump(cod.visualize_ego_network_handdrawn(_gMax, autor_principal, distancias), open(ego_pkl, 'wb'))
+    return pickle.load(open(ego_pkl, 'rb'))
 
-st.sidebar.header("Métricas Generales")
-st.sidebar.metric("Total de Autores", gMax.number_of_nodes())
-st.sidebar.metric("Colaboraciones", gMax.number_of_edges())
-st.sidebar.metric("Componentes Conexas", numComp)
-st.sidebar.metric("Tamaño Componente Gigante", tamComp)
-st.sidebar.header("Métricas de la Componente Gigante")
-
-#diametro = nx.diameter(gMax)
-#clusterCoeff = nx.average_clustering(gMax)
-
-st.sidebar.metric("Diámetro", 17) 
-st.sidebar.metric("Coeficiente de Clustering", 0.81) #los hardcodee porque tarda mucho en calcularlos y no tiene sentido para debuggear.
-
-
-
-@st.fragment
 def calcular_centralidad_aprox(_graph):
     central_pkl = os.path.join(cache_dir, 'centrality_cache.pkl')
 
@@ -116,27 +110,24 @@ def calcular_centralidad_aprox(_graph):
     return centrality_dict
 
 
-all_centralities = calcular_centralidad_aprox(gMax)
+gMax, g, numComp, tamComp  = cargarYProcesar('articles.csv')
 
+st.sidebar.header("Métricas Generales")
+st.sidebar.metric("Total de Autores", gMax.number_of_nodes())
+st.sidebar.metric("Colaboraciones", gMax.number_of_edges())
+st.sidebar.metric("Componentes Conexas", numComp)
+st.sidebar.metric("Tamaño Componente Gigante", tamComp)
+st.sidebar.header("Métricas de la Componente Gigante")
 
-#with tab1:
-#    st.header("Visualización del Componente Gigante")
-#    st.write("Nodos azules representan autores del DC, nodos rojos representan autores de otros departamentos.")
-#    
-#    fig, ax = plt.subplots(figsize=(16, 12))
-#    pos = nx.spring_layout(gMax, k=0.3, iterations=50, seed=42)
-#    node_colors = ['#0077b6' if gMax.nodes[node].get('dpto') == 'DC' else '#d62828' for node in gMax.nodes()]
-#    
-#    nx.draw_networkx_nodes(gMax, pos, node_size=100, node_color=node_colors, alpha=0.9, ax=ax)
-#    nx.draw_networkx_edges(gMax, pos, width=0.5, alpha=0.3, ax=ax)
-#    
-#    ax.set_title("Componente Gigante de la Red de Coautorías")
-#    plt.axis('off')
-#    st.pyplot(fig)
+#diametro = nx.diameter(gMax)
+#clusterCoeff = nx.average_clustering(gMax)
 
+st.sidebar.metric("Diámetro", 17) 
+st.sidebar.metric("Coeficiente de Clustering", 0.81) #los hardcodee porque tarda mucho en calcularlos y no tiene sentido para debuggear.
 
-st.header("Análisis de Centralidad y Puentes")
-k_seleccionado = st.slider("Precisión de Centralidad (k muestras)", min_value=100, max_value=1000, value=500, step=100)
+tab1, tab2, tab3 = st.tabs(["Análisis de Colaboración (Aristas)", "Análisis de Centralidad (Nodos)", "Análisis de Comunidades"])
+
+all_centralities = calcular_centralidad_aprox(g)
 
 col1, col2 = st.columns(2)
 with col1:
@@ -157,21 +148,24 @@ with col2:
         bio = biografias.get(autor_principal)
         st.markdown(f"![{autor_principal}]")            
         st.markdown(bio["texto"])
-#with tab3:
-#    st.header("Detección de Comunidades (Aproximación de Girvan-Newman)")
-#    st.write("Este algoritmo utiliza el estimador de centralidad de nodos para encontrar comunidades de forma eficiente.")
-#    
-#   
-#
-#
-#    k = st.slider("Selecciona el número de comunidades a generar:", 2, 5, 10, 20)
-#    if st.button("Detectar Comunidades"):
-#        with st.spinner("Ejecutando algoritmo de comunidades aproximado..."):
-
-#            comunidadesMostrar = calcular_comunidades_aprox(gMax, tuple(centralidadAproxDict.items()), k)
-#            fig_comm = cod.visualize_communities(gMax, comunidadesMostrar)
-#            st.pyplot(fig_comm)
-
+with tab3:
+    st.header("Análisis Estructural de la Red")
+    #st.header("Detección de Comunidades (Girvan-Newman Aproximado)")
+    #k_comunidades_slider = st.slider("Selecciona el número de comunidades a visualizar:", 2, 20, 5)
+    #@st.fragment
+    #def mostrar_comunidades(k_comunidades, k_aprox):
+    #    def most_valuable_edge_aprox(G):
+    #        edge_betweenness = nx.edge_betweenness_centrality(G, k=k_aprox, seed=42)
+    #        return max(edge_betweenness, key=edge_betweenness.get) if edge_betweenness else None
+    #    
+    #    st.write(f"Calculando partición para **{k_comunidades}** comunidades...")
+    #    communities_generator = nx.community.girvan_newman(gMax, most_valuable_edge=most_valuable_edge_aprox)
+    #    partition = next(itertools.islice(communities_generator, k_comunidades - 2, k_comunidades -1))
+    #    fig_comm = cod.visualize_communities(gMax, partition)
+    #    st.pyplot(fig_comm)
+    #mostrar_comunidades(k_comunidades_slider, k_seleccionado)
+    fig = distribucionDeDistancias(gMax)
+    st.pyplot(fig, clear_figure=True)
 
 
 
