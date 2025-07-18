@@ -128,26 +128,28 @@ st.sidebar.metric("Coeficiente de Clustering", 0.81) #los hardcodee porque tarda
 tab1, tab2, tab3 = st.tabs(["Análisis de Colaboración (Aristas)", "Análisis de Centralidad (Nodos)", "Análisis de Comunidades"])
 
 all_centralities = calcular_centralidad_aprox(g)
+with tab2:
+    k_seleccionado = st.slider("Precisión de Centralidad (k muestras)", min_value=100, max_value=1000, value=500, step=100)
 
-col1, col2 = st.columns(2)
-with col1:
-    st.subheader("Autores más Centrales")
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st.subheader("Autores más Centrales")
 
-    centralidad_aprox = all_centralities[k_seleccionado]
-    nodosOrdenadosCentralidad = sorted(centralidad_aprox.items(), key=lambda x: x[1], reverse=True)
+        centralidad_aprox = all_centralities[k_seleccionado]
+        nodosOrdenadosCentralidad = sorted(centralidad_aprox.items(), key=lambda x: x[1], reverse=True)
 
-    dfCentralidad = pd.DataFrame(centralidad_aprox.items(), columns=['Autor', 'Centralidad Aprox.'])
-    dfCentralidad_sorted = dfCentralidad.sort_values(by='Centralidad Aprox.', ascending=False).reset_index(drop=True)
-    
-    st.dataframe(dfCentralidad_sorted.head(10))
-    
+        dfCentralidad = pd.DataFrame(centralidad_aprox.items(), columns=['Autor', 'Centralidad Aprox.'])
+        dfCentralidad_sorted = dfCentralidad.sort_values(by='Centralidad Aprox.', ascending=False).reset_index(drop=True)
 
-with col2:
-    if nodosOrdenadosCentralidad:
-        autor_principal = nodosOrdenadosCentralidad[0][0]
-        bio = biografias.get(autor_principal)
-        st.markdown(f"![{autor_principal}]")            
-        st.markdown(bio["texto"])
+        st.dataframe(dfCentralidad_sorted.head(10))
+
+
+    with col2:
+        if nodosOrdenadosCentralidad:
+            autor_principal = nodosOrdenadosCentralidad[0][0]
+            bio = biografias.get(autor_principal)
+            st.markdown(f"![{autor_principal}]")            
+            st.markdown(bio["texto"])
 with tab3:
     st.header("Análisis Estructural de la Red")
     #st.header("Detección de Comunidades (Girvan-Newman Aproximado)")
