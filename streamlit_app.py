@@ -169,30 +169,26 @@ def calcular_y_visualizar_repeticion(w):
     return pickle.load(open(repeat_pkl), 'rb')
 
 def make_bg_transparent(html_content):
-    """Injects CSS to make the html and body of a document transparent."""
-    # Find the end of the <head> tag
     head_end = html_content.find("</head>")
     if head_end == -1:
         return html_content # Fallback if no head tag is found
     
-    # CSS to inject
     style_injection = """
     <style>
       html, body {
         background-color: transparent !important;
-        padding: 0 !important;
-        margin: -1px !important;
-        overflow: hidden; /* Oculta barras de scroll si aparecen */
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
       }
       #mynetwork {
-        border: none !important;
-        margin: -1px !important;
-        padding: 0 !important;
+        border: none;
+        margin: -1px;
+        padding: 0;
       }
     </style>
     """
     
-    # Insert the style block right before the closing </head> tag
     return html_content[:head_end] + style_injection + html_content[head_end:]
 
 g_multi, g_weighted = load_all_graphs()
@@ -227,8 +223,6 @@ all_centralities2 = calcular_centralidad_aprox(g_giant)
 
 @st.cache_data
 def get_interactive_graph_html(_graph_simple, _graph_weighted, _centrality, _partition, highlight_node=None):
-    """Cache both the graph layout and its HTML representation"""
-    # Generate unique cache key based on graph size and highlight node
     cache_key = f"graph_html_{len(_graph_simple.nodes())}_{highlight_node}"
     html_cache_file = os.path.join(cache_dir, f"{cache_key}.pkl")
     
@@ -236,7 +230,6 @@ def get_interactive_graph_html(_graph_simple, _graph_weighted, _centrality, _par
         with open(html_cache_file, 'rb') as f:
             return pickle.load(f)
     
-    # If not cached, generate new visualization
     file_name = cod.create_interactive_graph(_graph_simple, _graph_weighted, _centrality, _partition, highlight_node)
     with open(file_name, 'r', encoding='utf-8') as f:
         html_content = f.read()
@@ -248,16 +241,13 @@ def get_interactive_graph_html(_graph_simple, _graph_weighted, _centrality, _par
     return html_content
 
 def search_author(search_term, nodes):
-    """Consistent author search function for both visualization and path finding"""
     if not search_term:
         return None
     
-    # Case insensitive exact match
     exact_matches = [node for node in nodes if node.lower() == search_term.lower()]
     if exact_matches:
         return exact_matches[0]
     
-    # Case insensitive partial match
     partial_matches = [node for node in nodes if search_term.lower() in node.lower()]
     if partial_matches:
         return partial_matches[0]
@@ -371,7 +361,7 @@ with tab2:
         
     distancias = nx.shortest_path_length(g, source=autor_principal)
     df_distancias = pd.DataFrame(distancias.items(), columns=['Autor', 'Distancia a ' + autor_principal])
-    st.divider() 
+    #st.divider() 
     
     # @st.fragment
     # def path_finder_fragment():
