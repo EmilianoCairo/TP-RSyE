@@ -270,7 +270,7 @@ def collaboration_tab():
 
     num_nodes_to_display = st.slider(
             "Número de autores a visualizar:", 
-            min_value=100, max_value=len(g.nodes()), value=19171, step=100
+            min_value=100, max_value=len(g.nodes()), value=100, step=100
         )
 
     opciones = list(g.nodes())
