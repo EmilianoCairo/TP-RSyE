@@ -445,10 +445,10 @@ with tab2:
         "A la vez, se calcula el  *neighborhood overlap* para ese mismo lazo. " \
         "Finalmente, todas las colaboraciones (aristas) de la red se ordenan por su fuerza, se agrupan en percentiles, y se calcula el overlap promedio para cada percentil.  " \
         "\n La teoría de la fuerza de los lazos de Granovetter predice una correlación monótona positiva: " \
-        "los lazos fuertes (colaboraciones frecuentes) deberían ocurrir dentro de grupos cohesivos y, por lo tanto, mostrar un alto overlap, mientras que los lazos débiles actúan como puentes entre grupos y deberían tener un overlap bajo")
+        "los lazos fuertes (colaboraciones frecuentes) deberían ocurrir dentro de grupos cohesivos y, por lo tanto, mostrar un alto overlap, mientras que los lazos débiles actúan como puentes entre grupos y deberían tener un overlap bajo.")
     st.pyplot(fig_overlap)
     st.markdown("#### Resultados")
-    st.write("En el gráfico, sobre la relación entre el número de coautorías (tie strength) y la superposición de vecinos, se observa un comportamiento errático con fluctuaciones significativas, destacando un pico pronunciado cerca del percentil 55, seguido de una caída abrupta. Esta discrepancia con la teoría, que sugiriá una correlación motonoma positiva, sugiere que la estructura de la colaboración académica posee particularidades no capturadas por el modelo simple. Una hipótesis es que los lazos muy fuertes en esta red no siempre corresponden a pares de investigadores en un grupo denso, sino que pueden representar la relación entre un investigador senior (o director de laboratorio) y sus múltiples colaboradores junior, quienes no necesariamente colaboran entre sí. Este tipo de estructura, centralizada en un nodo hub, generaría lazos de alta fortaleza pero con un overlap bajo, explicando así la desviación del comportamiento esperado. Adicionalmente, las inconsistencias en los datos de autores podrían introducir ruido que afecta esta medición.")
+    st.write("En el gráfico, sobre la relación entre el número de coautorías (tie strength) y la superposición de vecinos, se observa un comportamiento errático con fluctuaciones significativas, destacando un pico pronunciado cerca del percentil 55, seguido de una caída abrupta. Esta discrepancia con la teoría, que sugería una correlación monótona positiva, sugiere que la estructura de la colaboración académica posee particularidades no capturadas por el modelo simple. Una hipótesis es que los lazos muy fuertes en esta red no siempre corresponden a pares de investigadores en un grupo denso, sino que pueden representar la relación entre un investigador senior (o director de laboratorio) y sus múltiples colaboradores junior, quienes no necesariamente colaboran entre sí. Este tipo de estructura, centralizada en un nodo hub, generaría lazos de alta fortaleza pero con un overlap bajo, explicando así la desviación del comportamiento esperado. Adicionalmente, las inconsistencias en los datos de autores podrían introducir ruido que afecta esta medición.")
 
 with tab3:
     st.subheader("Patrones de Colaboración por Autor")
@@ -464,7 +464,7 @@ with tab3:
     fig_repetition = cod.visualize_coauthor_repetition(g)
     st.pyplot(fig_repetition)
     st.markdown("#### Resultados")
-    st.write("Este gráfico ilustra la relación entre la cantidad total de colaboradores que tiene un autor y el porcentaje de esos colaboradores con quienes ha trabajado más de una vez. La tendencia observada es una correlación positiva y fuerte: a medida que un investigador amplía su red y colabora con más personas, también aumenta la proporción de sus lazos recurrentes. Esto sugiere que los investigadores, a medida que se vuelven más prolíficos, desarrollan un núcleo estable de colaboradores frecuentes, mientras continúan estableciendo nuevas colaboraciones débiles en la periferia de su red. En otras palabras, los autores con pocas colaboraciones tienden a tener lazos esporádicos, pero aquellos con redes extensas han consolidado relaciones de trabajo a largo plazo, lo que indica la formación de grupos de investigación estables y productivos")
+    st.write("Este gráfico ilustra la relación entre la cantidad total de colaboradores que tiene un autor y el porcentaje de esos colaboradores con quienes ha trabajado más de una vez. La tendencia observada es una correlación positiva y fuerte: a medida que un investigador amplía su red y colabora con más personas, también aumenta la proporción de sus lazos recurrentes. Esto sugiere que los investigadores, a medida que se vuelven más prolíficos, desarrollan un núcleo estable de colaboradores frecuentes, mientras continúan estableciendo nuevas colaboraciones débiles en la periferia de su red. En otras palabras, los autores con pocas colaboraciones tienden a tener lazos esporádicos, pero aquellos con redes extensas han consolidado relaciones de trabajo a largo plazo, lo que indica la formación de grupos de investigación estables y productivos.")
     st.divider()
 
     st.subheader("Distribución de distancias")
@@ -474,13 +474,12 @@ with tab3:
             "Dado el gran tamaño de la red, calcular la distancia entre todos los pares de nodos es computacionalmente inviable. " \
             "Por ello, se utilizó un método de muestreo: se seleccionó una muestra aleatoria de 1000 autores y se calculó la distancia desde cada uno de ellos a todos los demás nodos de la componente gigante usando BFS. " \
             "Los resultados de todas las búsquedas se agregaron para estimar la distribución de distancias global. " \
-            "La teoría de redes sociales, en particular el fenómeno del mundo pequeño, predice que en redes de gran escala como esta, la distancia promedio será sorprendentemente corta, con una distribución de probabilidad que decae rápidamente después de un pico en un valor bajo")
+            "La teoría de redes sociales, en particular el fenómeno del mundo pequeño, predice que en redes de gran escala como esta, la distancia promedio será sorprendentemente corta, con una distribución de probabilidad que decae rápidamente después de un pico en un valor bajo.")
     fig = distribucionDeDistancias(gMax)
     st.pyplot(fig, clear_figure=True)
     st.markdown("#### Resultados")
     st.write("" \
-        " Este gráfico muestra que la distancia más probable entre dos investigadores cualesquiera de la facultad es de aproximadamente seis grados de separación." \
-        "Este resultado es una clara evidencia de que la red de coautorías de la FCEyN exhibe la propiedad de mundo pequeño. " \
+        " Este gráfico muestra que la distancia más probable entre dos investigadores cualesquiera de la facultad es de aproximadamente seis grados de separación. Este resultado es una clara evidencia de que la red de coautorías de la FCEyN exhibe la propiedad de mundo pequeño. " \
         "A pesar del gran tamaño de la institución, cualquier investigador está, en promedio, a solo unas pocas coautorías de cualquier otro. ")
     st.divider()
     st.subheader("Análisis de Cierre Triádico")
@@ -537,5 +536,5 @@ with tab4:
              Además, un análisis dinámico completo permitiría modelar la evolución de las comunidades a lo largo del tiempo, 
              ofreciendo una visión más profunda de la formación y disolución de grupos de investigación. 
              Finalmente, la incorporación de redes de citaciones y el análisis de tópicos mediante procesamiento de lenguaje natural podrían mejorar el estudio, 
-             creando un mapa que no solo muestre quién colabora con quién, sino también sobre qué temas y con qué impacto.)
+             creando un mapa que no solo muestre quién colabora con quién, sino también sobre qué temas y con qué impacto.
              """)
