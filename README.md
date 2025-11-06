@@ -9,4 +9,7 @@ source venv/bin/activate
 4. instalar los requirements  
 pip install -r requirements.txt  
 5. correrlo  
-streamlit run streamlit_app.py  
+streamlit run streamlit_app.py
+
+Para acceder directamente a la aplicación:
+https://tp-rsye.streamlit.app
