@@ -268,11 +268,6 @@ def collaboration_tab():
         * **Highlight**: Usa el menú desplegable para seleccionar un autor y resaltarlo en el grafo.
         """)
 
-    num_nodes_to_display = st.slider(
-            "Número de autores a visualizar:", 
-            min_value=100, max_value=len(g.nodes()), value=100, step=100
-        )
-
     opciones = list(g.nodes())
     search_term = st.selectbox(
         "Seleccionar autor:",
@@ -280,7 +275,7 @@ def collaboration_tab():
     )
 
     centrality_for_viz = all_centralities2[1000]
-    top_nodes = sorted(centrality_for_viz, key=centrality_for_viz.get, reverse=True)[:num_nodes_to_display]
+    top_nodes = sorted(centrality_for_viz, key=centrality_for_viz.get, reverse=True)[:len(g.nodes())]
     
     highlight_node = None
     if search_term:
@@ -291,7 +286,7 @@ def collaboration_tab():
     g_visual = g_giant.subgraph(top_nodes)
 
 
-    if 'last_node_count' not in st.session_state or st.session_state.last_node_count != num_nodes_to_display:
+    if 'last_node_count' not in st.session_state or st.session_state.last_node_count != len(g.nodes()):
         
         num_nodes = g_visual.number_of_nodes()
         cache_file = os.path.join(cache_dir, f'base_html_{num_nodes}_nodes.pkl')
@@ -310,7 +305,7 @@ def collaboration_tab():
                 pickle.dump(base_html, f)
 
         st.session_state.current_base_html = base_html
-        st.session_state.last_node_count = num_nodes_to_display
+        st.session_state.last_node_count = len(g.nodes())
     
     base_graph_html = st.session_state.get('current_base_html', '<p>Por favor, seleccione un número de nodos para visualizar.</p>')
 
